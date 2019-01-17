@@ -31,8 +31,9 @@ and binary expressions:
     hex: 0x4
     bin: 100
 
-& is and
-| is or
+& is AND
+
+| is OR
 
 ## Planned features (no order)
 
