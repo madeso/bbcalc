@@ -44,4 +44,4 @@ and binary expressions:
 * Provide labels when more than 1 input is specifed
 * Some automatic testing
 * Truth table generation
-* csv export of that output
+* csv export of the output
