@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <cassert>
+#include <memory>
 
 const char* const PROGRAM_USAGE =
 "bintool\n"
@@ -11,6 +12,10 @@ const char* const PROGRAM_USAGE =
 " - evaluate boolean expressions\n"
 "\n";
 
+// ----------------------------------------------------------------------------------------------------
+// Util related
+// ----------------------------------------------------------------------------------------------------
+
 struct Str
 {
     std::stringstream ss;
@@ -18,6 +23,115 @@ struct Str
     std::string str() const { return ss.str(); }
     operator std::string() const { return str(); }
 };
+
+struct ErrorHandler
+{
+    std::vector<std::string> errors;
+    void Err(const std::string& str) { errors.emplace_back(str); }
+    bool HasErr() const { return !errors.empty(); }
+
+    void PrintErrors()
+    {
+        std::cerr << "Error while parsing: \n";
+        for (const auto& err : errors)
+        {
+            std::cerr << " - " << err << "\n";
+        }
+    }
+};
+
+template<typename T, typename C, typename Default, typename SizeProvider>
+struct Input
+{
+    C input;
+    unsigned int next = 0;
+
+    // read a single char
+    T Read()
+    {
+        if (next >= SizeProvider::Size(input))
+        {
+            return Default::Provide();
+        }
+        else
+        {
+            const auto old = next;
+            next += 1;
+            return input[old];
+        }
+    }
+
+    // returns true if we have reached eof and read/peek only return 0
+    bool IsEof() const
+    {
+        return next >= SizeProvider::Size(input);
+    }
+
+    // look ahead 1 character
+    T Peek(unsigned int advance = 0)
+    {
+        if (next + advance >= SizeProvider::Size(input))
+        {
+            return Default::Provide();
+        }
+        else
+        {
+            return input[next + advance];
+        }
+    }
+};
+
+// ----------------------------------------------------------------------------------------------------
+// Common related
+// ----------------------------------------------------------------------------------------------------
+
+struct Token
+{
+    enum Type { NUMBER, OPAND, OPOR, EOFTOKEN };
+
+    std::string ToString() const
+    {
+        static const char* NAMES[] = { "NUMBER", "AND", "OR", "EOF" };
+        std::stringstream ss;
+
+        ss << NAMES[static_cast<int>(type)];
+
+        if(type == NUMBER)
+        {
+            ss << "(" << value << ")";
+        }
+        return ss.str();
+    }
+
+    Type type;
+    int value;
+
+    static Token Number(int num) {
+        Token ret;
+        ret.type = NUMBER;
+        ret.value = num;
+        return ret;
+    }
+
+    static Token And() { return FromType(OPAND); }
+    static Token Or() { return FromType(OPOR); }
+
+    static const Token& Eof() { static auto eof = FromType(EOFTOKEN); return eof; }
+
+private:
+    static Token FromType(Type t)
+    {
+        assert(t != NUMBER);
+        Token ret;
+        ret.type = t;
+        ret.value = 0;
+        return ret;
+    }
+};
+
+// ----------------------------------------------------------------------------------------------------
+// Lexing related
+// ----------------------------------------------------------------------------------------------------
 
 bool IsSpace(char c)
 {
@@ -50,6 +164,18 @@ bool IsHexa(char c)
 bool IsAz(char c)
 {
     if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) return true;
+    else return false;
+}
+
+bool IsAnd(char c)
+{
+    if (c == '&') return true;
+    else return false;
+}
+
+bool IsOr(char c)
+{
+    if (c == '|') return true;
     else return false;
 }
 
@@ -93,49 +219,24 @@ int ParseDecimal(const std::string& str)
     return n;
 }
 
-struct Lexer
+struct ProvideNullChar
 {
-    std::string input;
-    unsigned int next = 0;
-
-    std::vector<std::string> errors;
-    void Err(const std::string& str) { errors.emplace_back(str); }
-    bool HasErr() const { return !errors.empty(); }
-
-    // read a single char
-    char Read()
+    static char Provide()
     {
-        if (next >= input.length())
-        {
-            return 0;
-        }
-        else
-        {
-            const auto c = input[next];
-            next += 1;
-            return c;
-        }
+        return 0;
     }
+};
 
-    // returns true if we have reached eof and read/peek only return 0
-    bool IsEof() const
+struct StringSizeProvider
+{
+    static unsigned int Size(const std::string& str)
     {
-        return next >= input.length();
+        return str.length();
     }
+};
 
-    // look ahead 1 character
-    char Peek(unsigned int advance=0)
-    {
-        if (next+advance>= input.length())
-        {
-            return 0;
-        }
-        else
-        {
-            return input[next+advance];
-        }
-    }
-
+struct Lexer : public ErrorHandler, public Input<char, std::string, ProvideNullChar, StringSizeProvider>
+{
     void SkipSpaces()
     {
         while (!IsEof() && IsSpace(Peek()))
@@ -218,25 +319,157 @@ struct Lexer
         }
     }
 
-    void ParseToList()
+    void ParseToTokens()
     {
         while (!IsEof() && !HasErr())
         {
             SkipSpaces();
             if (!IsEof())
             {
-                const auto num = ReadNumber();
-                if (!HasErr())
+                if (IsNumber(Peek()))
                 {
-                    numbers.emplace_back(num);
+                    const auto num = ReadNumber();
+                    if (!HasErr())
+                    {
+                        tokens.emplace_back(Token::Number(num));
+                    }
+                    SkipSpaces();
                 }
-                SkipSpaces();
+                else if (IsAnd(Peek()))
+                {
+                    Read();
+                    tokens.emplace_back(Token::And());
+                }
+                else if (IsOr(Peek()))
+                {
+                    Read();
+                    tokens.emplace_back(Token::Or());
+                }
+                else
+                {
+                    Err(Str() << "Invalid character: " << Peek());
+                    return;
+                }
             }
         }
     }
 
-    std::vector<int> numbers;
+    std::vector<Token> tokens;
 };
+
+// ----------------------------------------------------------------------------------------------------
+// Parsing related
+// ----------------------------------------------------------------------------------------------------
+
+struct Node
+{
+    virtual ~Node() {}
+    virtual int Calculate() const = 0;
+};
+
+struct ErrorNode : public Node
+{
+    int Calculate() const override { return 0; }
+    static std::shared_ptr<Node> Make() { return std::make_shared<ErrorNode>(); }
+};
+
+
+struct NumberNode : public Node
+{
+    int value;
+
+    NumberNode(int n) : value(n) {}
+    int Calculate() const override { return value; }
+};
+
+struct AndNode : public Node
+{
+    std::shared_ptr<Node> lhs;
+    std::shared_ptr<Node> rhs;
+
+    AndNode(std::shared_ptr<Node> l, std::shared_ptr<Node> r) : lhs(l), rhs(r) {}
+    int Calculate() const override { return lhs->Calculate() & rhs->Calculate(); }
+};
+
+struct OrNode : public Node
+{
+    std::shared_ptr<Node> lhs;
+    std::shared_ptr<Node> rhs;
+
+    OrNode(std::shared_ptr<Node> l, std::shared_ptr<Node> r) : lhs(l), rhs(r) {}
+    int Calculate() const override { return lhs->Calculate() | rhs->Calculate(); }
+};
+
+struct ProvideEofToken
+{
+    static const Token& Provide() { return Token::Eof(); }
+};
+
+template<typename T>
+struct VectorSizeProvider
+{
+    static unsigned int Size(const std::vector<T>& vec)
+    {
+        return vec.size();
+    }
+};
+
+struct Parser : public ErrorHandler, Input<const Token&, std::vector<Token>, ProvideEofToken, VectorSizeProvider<Token> >
+{
+    std::shared_ptr<Node> ParseNumber()
+    {
+        if (Peek().type == Token::NUMBER)
+        {
+            return std::make_shared<NumberNode>(Read().value);
+        }
+        else
+        {
+            Err(Str() << "Expected number but got " << Read().ToString());
+            return ErrorNode::Make();
+        }
+    }
+
+    std::shared_ptr<Node> Parse()
+    {
+        auto root = ParseNumber();
+        if (HasErr()) return ErrorNode::Make();
+
+        while (!IsEof())
+        {
+            switch (Peek().type)
+            {
+            case Token::OPAND:
+            {
+                Read();
+                auto lhs = root;
+                auto rhs = ParseNumber();
+                if (HasErr()) return ErrorNode::Make();
+                root = std::make_shared<AndNode>(lhs, rhs);
+                break;
+            }
+            case Token::OPOR:
+            {
+                Read();
+                auto lhs = root;
+                auto rhs = ParseNumber();
+                if (HasErr()) return ErrorNode::Make();
+                root = std::make_shared<OrNode>(lhs, rhs);
+                break;
+            }
+            default:
+                Err(Str() << "Expected OP but got " << Read().ToString());
+                return ErrorNode::Make();
+            }
+        }
+
+        if (HasErr()) return ErrorNode::Make();
+        else return root;
+    }
+};
+
+// ----------------------------------------------------------------------------------------------------
+// Commandline related
+// ----------------------------------------------------------------------------------------------------
 
 bool IsCommandLine(char c)
 {
@@ -289,6 +522,7 @@ enum
     MAIN_CMD_ERR = -1,
     MAIN_LEX_ERR = -2,
     MAIN_EMPTY_LEX = -3,
+    MAIN_PARSER_ERR = -4,
     MAIN_OK = 0,
     MAIN_USAGE=0
 };
@@ -322,27 +556,31 @@ int main(int argc, char *argv[])
             }
             Lexer lexer;
             lexer.input = arg;
-            lexer.ParseToList();
+            lexer.ParseToTokens();
             if (lexer.HasErr())
             {
-                std::cerr << "Error while parsing: \n";
-                for (const auto& err : lexer.errors)
-                {
-                    std::cerr << " - " << err << "\n";
-                }
+                lexer.PrintErrors();
                 return MAIN_LEX_ERR;
             }
-            
-            if (lexer.numbers.empty())
+
+            if (lexer.tokens.empty())
             {
                 std::cerr << "Empty statement\n";
                 return MAIN_EMPTY_LEX;
             }
 
-            for (const auto n : lexer.numbers)
+            Parser parser;
+            parser.input = lexer.tokens;
+
+            auto root = parser.Parse();
+
+            if (parser.HasErr())
             {
-                print_number(n);
+                parser.PrintErrors();
+                return MAIN_PARSER_ERR;
             }
+
+            print_number(root->Calculate());
         }
     }
 
