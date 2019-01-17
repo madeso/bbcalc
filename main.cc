@@ -305,7 +305,7 @@ struct Lexer : public ErrorHandler, public Input<char, std::string, ProvideNullC
             std::stringstream ss;
             ss << first << second;
 
-            while (!IsEof() && IsBinary(Peek()))
+            while (!IsEof() && IsNumber(Peek()))
             {
                 ss << Read();
             }
