@@ -10,46 +10,67 @@
 // Util related
 // ----------------------------------------------------------------------------------------------------
 
-Output::~Output() {}
+Output::~Output()
+{
+}
 
-int to_int(std::size_t i)
+int
+to_int(std::size_t i)
 {
     return static_cast<int>(i);
 }
 
-std::size_t to_sizet(int i)
+std::size_t
+to_sizet(int i)
 {
     return static_cast<std::size_t>(i);
 }
 
-std::string Str::str() const { return ss.str(); }
+std::string
+Str::str() const
+{
+    return ss.str();
+}
 
-Str::operator std::string() const { return str(); }
+Str::operator std::string() const
+{
+    return str();
+}
 
 struct ErrorHandler
 {
     std::vector<std::string> errors;
-    void Err(const std::string& str) { errors.emplace_back(str); }
-    bool HasErr() const { return !errors.empty(); }
+    void
+    Err(const std::string& str)
+    {
+        errors.emplace_back(str);
+    }
+    bool
+    HasErr() const
+    {
+        return !errors.empty();
+    }
 
-    void PrintErrors(Output* output)
+    void
+    PrintErrors(Output* output)
     {
         output->PrintError("Error while parsing:");
-        for (const auto& err : errors)
+        for (const auto& err: errors)
         {
             output->PrintError(Str{} << " - " << err);
         }
     }
 };
 
-template<typename T, typename C, typename Default, typename SizeProvider>
+template <typename T, typename C, typename Default, typename SizeProvider>
 struct Input
 {
     C input;
     int next = 0;
 
     // read a single char
-    T Read()
+    T
+    Read()
     {
         if (next >= SizeProvider::Size(input))
         {
@@ -64,13 +85,15 @@ struct Input
     }
 
     // returns true if we have reached eof and read/peek only return 0
-    bool IsEof() const
+    bool
+    IsEof() const
     {
         return next >= SizeProvider::Size(input);
     }
 
     // look ahead 1 character
-    T Peek(int advance = 0)
+    T
+    Peek(int advance = 0)
     {
         if (next + advance >= SizeProvider::Size(input))
         {
@@ -89,16 +112,23 @@ struct Input
 
 struct Token
 {
-    enum Type { NUMBER, OPAND, OPOR, EOFTOKEN };
-
-    std::string ToString() const
+    enum Type
     {
-        static const char* NAMES[] = { "NUMBER", "AND", "OR", "EOF" };
+        NUMBER,
+        OPAND,
+        OPOR,
+        EOFTOKEN
+    };
+
+    std::string
+    ToString() const
+    {
+        static const char* NAMES[] = {"NUMBER", "AND", "OR", "EOF"};
         std::stringstream ss;
 
         ss << NAMES[static_cast<int>(type)];
 
-        if(type == NUMBER)
+        if (type == NUMBER)
         {
             ss << "(" << value << ")";
         }
@@ -108,20 +138,36 @@ struct Token
     Type type;
     int value;
 
-    static Token Number(int num) {
+    static Token
+    Number(int num)
+    {
         Token ret;
         ret.type = NUMBER;
         ret.value = num;
         return ret;
     }
 
-    static Token And() { return FromType(OPAND); }
-    static Token Or() { return FromType(OPOR); }
+    static Token
+    And()
+    {
+        return FromType(OPAND);
+    }
+    static Token
+    Or()
+    {
+        return FromType(OPOR);
+    }
 
-    static const Token& Eof() { static auto eof = FromType(EOFTOKEN); return eof; }
+    static const Token&
+    Eof()
+    {
+        static auto eof = FromType(EOFTOKEN);
+        return eof;
+    }
 
 private:
-    static Token FromType(Type t)
+    static Token
+    FromType(Type t)
     {
         assert(t != NUMBER);
         Token ret;
@@ -135,7 +181,8 @@ private:
 // Lexing related
 // ----------------------------------------------------------------------------------------------------
 
-bool IsSpace(char c)
+bool
+IsSpace(char c)
 {
     if (c == ' ') return true;
     if (c == '\t') return true;
@@ -144,47 +191,64 @@ bool IsSpace(char c)
     return false;
 }
 
-bool IsBinary(char c)
+bool
+IsBinary(char c)
 {
-    if (c == '0' || c == '1') return true;
-    else return false;
+    if (c == '0' || c == '1')
+        return true;
+    else
+        return false;
 }
 
-bool IsNumber(char c)
+bool
+IsNumber(char c)
 {
-    if (c >= '0' && c <= '9') return true;
-    else return false;
+    if (c >= '0' && c <= '9')
+        return true;
+    else
+        return false;
 }
 
-bool IsHexa(char c)
+bool
+IsHexa(char c)
 {
     if (IsNumber(c)) return true;
     if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) return true;
     return false;
 }
 
-bool IsAz(char c)
+bool
+IsAz(char c)
 {
-    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) return true;
-    else return false;
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+        return true;
+    else
+        return false;
 }
 
-bool IsAnd(char c)
+bool
+IsAnd(char c)
 {
-    if (c == '&') return true;
-    else return false;
+    if (c == '&')
+        return true;
+    else
+        return false;
 }
 
-bool IsOr(char c)
+bool
+IsOr(char c)
 {
-    if (c == '|') return true;
-    else return false;
+    if (c == '|')
+        return true;
+    else
+        return false;
 }
 
-int ParseBinary(const std::string& str)
+int
+ParseBinary(const std::string& str)
 {
     int n = 0;
-    for (const char c : str)
+    for (const char c: str)
     {
         n = n << 1;
         if (c == '1')
@@ -203,7 +267,8 @@ int ParseBinary(const std::string& str)
     return n;
 }
 
-int ParseHexa(const std::string& str)
+int
+ParseHexa(const std::string& str)
 {
     int n;
     std::istringstream parser(str);
@@ -212,7 +277,8 @@ int ParseHexa(const std::string& str)
     return n;
 }
 
-int ParseDecimal(const std::string& str)
+int
+ParseDecimal(const std::string& str)
 {
     int n;
     std::istringstream parser(str);
@@ -223,7 +289,8 @@ int ParseDecimal(const std::string& str)
 
 struct ProvideNullChar
 {
-    static char Provide()
+    static char
+    Provide()
     {
         return 0;
     }
@@ -231,15 +298,19 @@ struct ProvideNullChar
 
 struct StringSizeProvider
 {
-    static int Size(const std::string& str)
+    static int
+    Size(const std::string& str)
     {
         return to_int(str.length());
     }
 };
 
-struct Lexer : public ErrorHandler, public Input<char, std::string, ProvideNullChar, StringSizeProvider>
+struct Lexer
+    : public ErrorHandler
+    , public Input<char, std::string, ProvideNullChar, StringSizeProvider>
 {
-    void SkipSpaces()
+    void
+    SkipSpaces()
     {
         while (!IsEof() && IsSpace(Peek()))
         {
@@ -247,21 +318,23 @@ struct Lexer : public ErrorHandler, public Input<char, std::string, ProvideNullC
         }
     }
 
-    int ReadNumber()
+    int
+    ReadNumber()
     {
         const auto first = Peek();
         if (!IsNumber(first))
         {
-            Err(Str() << "Numbers must start with a number, but started with '" << first << "' (" << static_cast<int>(first) << ")");
+            Err(Str() << "Numbers must start with a number, but started with '"
+                      << first << "' (" << static_cast<int>(first) << ")");
             return 0;
         }
         Read();
 
         const auto second = Peek();
-        
-        if(second == 'x' || second == 'X')
+
+        if (second == 'x' || second == 'X')
         {
-            Read(); // read the x
+            Read();  // read the x
             std::stringstream ss;
             while (!IsEof() && IsHexa(Peek()))
             {
@@ -270,31 +343,37 @@ struct Lexer : public ErrorHandler, public Input<char, std::string, ProvideNullC
             const auto read = ss.str();
             if (read.empty())
             {
-                Err(Str() << "Numbers started with 0x must contain atleast one hexa character but was continued with " << Peek());
+                Err(Str()
+                    << "Numbers started with 0x must contain atleast one hexa character but was continued with "
+                    << Peek());
                 return 0;
             }
             return ParseHexa(read);
         }
-        else if(second == 'b' || second == 'B')
+        else if (second == 'b' || second == 'B')
         {
-            Read(); // read the b
+            Read();  // read the b
             std::stringstream ss;
             while (!IsEof() && IsNumber(Peek()))
             {
-                if(IsBinary(Peek()))
+                if (IsBinary(Peek()))
                 {
                     ss << Read();
                 }
                 else
                 {
-                    Err(Str() << "binary numbers can't contain other than 0 or 1, read: " << Peek());
+                    Err(Str()
+                        << "binary numbers can't contain other than 0 or 1, read: "
+                        << Peek());
                     return 0;
                 }
             }
             const auto read = ss.str();
             if (read.empty())
             {
-                Err(Str() << "Numbers started with 0b must contain atleast one binary character but was continued with " << Peek());
+                Err(Str()
+                    << "Numbers started with 0b must contain atleast one binary character but was continued with "
+                    << Peek());
                 return 0;
             }
             return ParseBinary(read);
@@ -321,7 +400,8 @@ struct Lexer : public ErrorHandler, public Input<char, std::string, ProvideNullC
         }
     }
 
-    void ParseToTokens()
+    void
+    ParseToTokens()
     {
         while (!IsEof() && !HasErr())
         {
@@ -365,14 +445,25 @@ struct Lexer : public ErrorHandler, public Input<char, std::string, ProvideNullC
 
 struct Node
 {
-    virtual ~Node() {}
-    virtual int Calculate() const = 0;
+    virtual ~Node()
+    {
+    }
+    virtual int
+    Calculate() const = 0;
 };
 
 struct ErrorNode : public Node
 {
-    int Calculate() const override { return 0; }
-    static std::shared_ptr<Node> Make() { return std::make_shared<ErrorNode>(); }
+    int
+    Calculate() const override
+    {
+        return 0;
+    }
+    static std::shared_ptr<Node>
+    Make()
+    {
+        return std::make_shared<ErrorNode>();
+    }
 };
 
 
@@ -380,8 +471,14 @@ struct NumberNode : public Node
 {
     int value;
 
-    NumberNode(int n) : value(n) {}
-    int Calculate() const override { return value; }
+    NumberNode(int n) : value(n)
+    {
+    }
+    int
+    Calculate() const override
+    {
+        return value;
+    }
 };
 
 struct AndNode : public Node
@@ -389,8 +486,14 @@ struct AndNode : public Node
     std::shared_ptr<Node> lhs;
     std::shared_ptr<Node> rhs;
 
-    AndNode(std::shared_ptr<Node> l, std::shared_ptr<Node> r) : lhs(l), rhs(r) {}
-    int Calculate() const override { return lhs->Calculate() & rhs->Calculate(); }
+    AndNode(std::shared_ptr<Node> l, std::shared_ptr<Node> r) : lhs(l), rhs(r)
+    {
+    }
+    int
+    Calculate() const override
+    {
+        return lhs->Calculate() & rhs->Calculate();
+    }
 };
 
 struct OrNode : public Node
@@ -398,27 +501,44 @@ struct OrNode : public Node
     std::shared_ptr<Node> lhs;
     std::shared_ptr<Node> rhs;
 
-    OrNode(std::shared_ptr<Node> l, std::shared_ptr<Node> r) : lhs(l), rhs(r) {}
-    int Calculate() const override { return lhs->Calculate() | rhs->Calculate(); }
+    OrNode(std::shared_ptr<Node> l, std::shared_ptr<Node> r) : lhs(l), rhs(r)
+    {
+    }
+    int
+    Calculate() const override
+    {
+        return lhs->Calculate() | rhs->Calculate();
+    }
 };
 
 struct ProvideEofToken
 {
-    static const Token& Provide() { return Token::Eof(); }
+    static const Token&
+    Provide()
+    {
+        return Token::Eof();
+    }
 };
 
-template<typename T>
+template <typename T>
 struct VectorSizeProvider
 {
-    static int Size(const std::vector<T>& vec)
+    static int
+    Size(const std::vector<T>& vec)
     {
         return to_int(vec.size());
     }
 };
 
-struct Parser : public ErrorHandler, Input<const Token&, std::vector<Token>, ProvideEofToken, VectorSizeProvider<Token> >
+struct Parser
+    : public ErrorHandler
+    , Input<const Token&,
+            std::vector<Token>,
+            ProvideEofToken,
+            VectorSizeProvider<Token>>
 {
-    std::shared_ptr<Node> ParseNumber()
+    std::shared_ptr<Node>
+    ParseNumber()
     {
         if (Peek().type == Token::NUMBER)
         {
@@ -431,7 +551,8 @@ struct Parser : public ErrorHandler, Input<const Token&, std::vector<Token>, Pro
         }
     }
 
-    std::shared_ptr<Node> Parse()
+    std::shared_ptr<Node>
+    Parse()
     {
         auto root = ParseNumber();
         if (HasErr()) return ErrorNode::Make();
@@ -440,8 +561,7 @@ struct Parser : public ErrorHandler, Input<const Token&, std::vector<Token>, Pro
         {
             switch (Peek().type)
             {
-            case Token::OPAND:
-            {
+            case Token::OPAND: {
                 Read();
                 auto lhs = root;
                 auto rhs = ParseNumber();
@@ -449,8 +569,7 @@ struct Parser : public ErrorHandler, Input<const Token&, std::vector<Token>, Pro
                 root = std::make_shared<AndNode>(lhs, rhs);
                 break;
             }
-            case Token::OPOR:
-            {
+            case Token::OPOR: {
                 Read();
                 auto lhs = root;
                 auto rhs = ParseNumber();
@@ -464,8 +583,10 @@ struct Parser : public ErrorHandler, Input<const Token&, std::vector<Token>, Pro
             }
         }
 
-        if (HasErr()) return ErrorNode::Make();
-        else return root;
+        if (HasErr())
+            return ErrorNode::Make();
+        else
+            return root;
     }
 };
 
@@ -473,7 +594,8 @@ struct Parser : public ErrorHandler, Input<const Token&, std::vector<Token>, Pro
 // Commandline related
 // ----------------------------------------------------------------------------------------------------
 
-bool IsCommandLine(char c)
+bool
+IsCommandLine(char c)
 {
     if (c == '/') return true;
     if (c == '-') return true;
@@ -481,9 +603,13 @@ bool IsCommandLine(char c)
     return false;
 }
 
-std::string ToBinaryString(int n)
+std::string
+ToBinaryString(int n)
 {
-    if (n == 0) { return "0"; }
+    if (n == 0)
+    {
+        return "0";
+    }
 
     std::vector<char> c;
     {
@@ -491,7 +617,8 @@ std::string ToBinaryString(int n)
         int i = 0;
         while (number > 0)
         {
-            if (i >= 4) {
+            if (i >= 4)
+            {
                 i -= 4;
                 c.emplace_back(' ');
             }
@@ -510,7 +637,8 @@ std::string ToBinaryString(int n)
     return ss.str();
 }
 
-void print_number(Output* output, int n)
+void
+print_number(Output* output, int n)
 {
     output->PrintInfo(Str{} << "dec: " << std::dec << n);
     output->PrintInfo(Str{} << "hex: 0x" << std::hex << n);
@@ -524,17 +652,16 @@ enum
     MAIN_EMPTY_LEX = -3,
     MAIN_PARSER_ERR = -4,
     MAIN_OK = 0,
-    MAIN_USAGE=0
+    MAIN_USAGE = 0
 };
 
-int RunCalcApp
-(
-    const std::string& appname,
-    const std::vector<std::string>& arguments,
-    Output* output
-)
+int
+RunCalcApp(
+        const std::string& appname,
+        const std::vector<std::string>& arguments,
+        Output* output)
 {
-    for(const auto& arg: arguments)
+    for (const auto& arg: arguments)
     {
         if (IsCommandLine(arg[0]))
         {
@@ -584,4 +711,3 @@ int RunCalcApp
 
     return MAIN_OK;
 }
-
