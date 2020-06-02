@@ -25,7 +25,10 @@ main(int argc, char* argv[])
 
     for (int i = 1; i < argc; i += 1)
     {
-        if (argv[0] == 0) continue;
+        if (argv[0] == nullptr)
+        {
+            continue;
+        }
         const std::string arg = argv[i];
         arguments.emplace_back(arg);
     }
