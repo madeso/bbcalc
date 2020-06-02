@@ -11,6 +11,7 @@
 
 #include "calc/str.h"
 #include "calc/errorhandler.h"
+#include "calc/token.h"
 
 // ----------------------------------------------------------------------------------------------------
 // Util related
@@ -75,86 +76,9 @@ struct Input
 
 
 // ----------------------------------------------------------------------------------------------------
-// Common related
-// ----------------------------------------------------------------------------------------------------
-
-struct Token
-{
-    enum Type
-    {
-        NUMBER,
-        OPAND,
-        OPOR,
-        EOFTOKEN
-    };
-
-    [[nodiscard]] std::string
-    ToString() const
-    {
-        constexpr std::array NAMES{
-                std::string_view{"NUMBER"},
-                std::string_view{"AND"},
-                std::string_view{"OR"},
-                std::string_view{"EOF"}};
-        using A = decltype(NAMES);
-
-        std::stringstream ss;
-
-        ss << NAMES[static_cast<A::size_type>(type)];
-
-        if (type == NUMBER)
-        {
-            ss << "(" << value << ")";
-        }
-        return ss.str();
-    }
-
-    Type type;
-    int value;
-
-    static Token
-    Number(int num)
-    {
-        Token ret{};
-        ret.type = NUMBER;
-        ret.value = num;
-        return ret;
-    }
-
-    static Token
-    And()
-    {
-        return FromType(OPAND);
-    }
-
-    static Token
-    Or()
-    {
-        return FromType(OPOR);
-    }
-
-    static const Token&
-    Eof()
-    {
-        static auto Eof = FromType(EOFTOKEN);
-        return Eof;
-    }
-
-private:
-    static Token
-    FromType(Type t)
-    {
-        assert(t != NUMBER);
-        Token ret{};
-        ret.type = t;
-        ret.value = 0;
-        return ret;
-    }
-};
-
-// ----------------------------------------------------------------------------------------------------
 // Lexing related
 // ----------------------------------------------------------------------------------------------------
+
 
 bool
 IsSpace(char c)
