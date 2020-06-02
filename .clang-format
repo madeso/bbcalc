@@ -5,7 +5,6 @@ BasedOnStyle: Google
 # more than one template argument are not split on to multiple lines
 
 
-# in 10 change to cpp17
 Standard: Cpp11
 Language: Cpp
 
@@ -86,8 +85,7 @@ KeepEmptyLinesAtTheStartOfBlocks: false
 MaxEmptyLinesToKeep: 2
 
 
-# or inner to avoid unesssary indenting
-NamespaceIndentation: All
+NamespaceIndentation: Inner
 
 # penalty variables here, not sure how to use them...
 
@@ -109,7 +107,7 @@ SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: ControlStatements
 
 SpaceBeforeRangeBasedForLoopColon: false
-# SpaceInEmptyBlock: false          # in 10, uncomment
+SpaceInEmptyBlock: false
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 2
 SpacesInAngles: false
