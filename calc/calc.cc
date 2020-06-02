@@ -9,13 +9,11 @@
 #include <array>
 #include <string_view>
 
+#include "calc/str.h"
+
 // ----------------------------------------------------------------------------------------------------
 // Util related
 // ----------------------------------------------------------------------------------------------------
-
-Output::Output() = default;
-
-Output::~Output() = default;
 
 int
 ToInt(std::size_t i)
@@ -27,11 +25,6 @@ std::size_t
 ToSizet(int i)
 {
     return static_cast<std::size_t>(i);
-}
-
-Str::operator std::string() const
-{
-    return ss.str();
 }
 
 struct ErrorHandler

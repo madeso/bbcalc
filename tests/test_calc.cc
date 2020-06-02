@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include "calc/calc.h"
+#include "calc/str.h"
 
 #include "catchy/vectorequals.h"
 
