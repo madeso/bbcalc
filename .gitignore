@@ -3,4 +3,5 @@ build/*
 
 # undo files
 *.un~
+.vscode/*
 

@@ -18,6 +18,11 @@ set_project_warnings(project_warnings)
 
 
 ##############################################################################
+## dependencies
+add_subdirectory(external/catchy)
+
+
+##############################################################################
 ## calc library
 
 add_library(calculator STATIC
@@ -52,17 +57,14 @@ target_link_libraries(bbcalc
 ## calc (unit) tests
 
 add_executable(tests
-    test/main.cc
-    test/test_calc.cc
-)
-target_include_directories(tests
-    PRIVATE
-    external/catch/
+    tests/main.cc
+    tests/test_calc.cc
 )
 target_link_libraries(
     tests
     PUBLIC
     calculator
+    catchy
     ${CMAKE_THREAD_LIBS_INIT}
     PRIVATE
     project_options

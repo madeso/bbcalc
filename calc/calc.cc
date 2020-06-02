@@ -22,13 +22,9 @@ std::size_t to_sizet(int i)
     return static_cast<std::size_t>(i);
 }
 
-struct Str
-{
-    std::stringstream ss;
-    template<typename T> Str& operator<<(const T& t) { ss << t; return *this; }
-    std::string str() const { return ss.str(); }
-    operator std::string() const { return str(); }
-};
+std::string Str::str() const { return ss.str(); }
+
+Str::operator std::string() const { return str(); }
 
 struct ErrorHandler
 {
