@@ -90,7 +90,7 @@ TEST_CASE("calc", "[calc]")
 {
     VectorOutput lines;
 
-    SECTION("")
+    SECTION("help")
     {
         const auto output = RunCalcApp("calcapp", {}, &lines);
         CHECK(output == 0);
@@ -99,6 +99,39 @@ TEST_CASE("calc", "[calc]")
             Inf(" - print truth table of expressions"),
             Inf(" - convert between binary and hexadecimal values"),
             Inf(" - evaluate boolean expressions")
+        }));
+    }
+
+    SECTION("convert dec")
+    {
+        const auto output = RunCalcApp("calcapp", {"42"}, &lines);
+        CHECK(output == 0);
+        CHECK(VectorEquals(lines, {
+            Inf("dec: 42"),
+            Inf("hex: 0x2a"),
+            Inf("bin: 10 1010")
+        }));
+    }
+
+    SECTION("convert hex")
+    {
+        const auto output = RunCalcApp("calcapp", {"0x42"}, &lines);
+        CHECK(output == 0);
+        CHECK(VectorEquals(lines, {
+            Inf("dec: 66"),
+            Inf("hex: 0x42"),
+            Inf("bin: 100 0010")
+        }));
+    }
+
+    SECTION("convert binary")
+    {
+        const auto output = RunCalcApp("calcapp", {"0b1010"}, &lines);
+        CHECK(output == 0);
+        CHECK(VectorEquals(lines, {
+            Inf("dec: 10"),
+            Inf("hex: 0xa"),
+            Inf("bin: 1010")
         }));
     }
 }
