@@ -42,6 +42,7 @@ struct ErrorHandler
     {
         errors.emplace_back(str);
     }
+
     [[nodiscard]] bool
     HasErr() const
     {
@@ -58,6 +59,7 @@ struct ErrorHandler
         }
     }
 };
+
 
 template <typename T, typename C, typename Default, typename SizeProvider>
 struct Input
@@ -102,6 +104,7 @@ struct Input
         }
     }
 };
+
 
 // ----------------------------------------------------------------------------------------------------
 // Common related
@@ -155,6 +158,7 @@ struct Token
     {
         return FromType(OPAND);
     }
+
     static Token
     Or()
     {
@@ -206,6 +210,7 @@ IsSpace(char c)
     return false;
 }
 
+
 bool
 IsBinary(char c)
 {
@@ -222,6 +227,7 @@ IsBinary(char c)
         }
     }
 }
+
 
 bool
 IsNumber(char c)
@@ -240,6 +246,7 @@ IsNumber(char c)
     }
 }
 
+
 bool
 IsHexa(char c)
 {
@@ -253,6 +260,7 @@ IsHexa(char c)
     }
     return false;
 }
+
 
 bool
 IsAz(char c)
@@ -271,6 +279,7 @@ IsAz(char c)
     }
 }
 
+
 bool
 IsAnd(char c)
 {
@@ -288,6 +297,7 @@ IsAnd(char c)
     }
 }
 
+
 bool
 IsOr(char c)
 {
@@ -304,6 +314,7 @@ IsOr(char c)
         }
     }
 }
+
 
 int
 ParseBinary(const std::string& str)
@@ -328,6 +339,7 @@ ParseBinary(const std::string& str)
     return n;
 }
 
+
 int
 ParseHexa(const std::string& str)
 {
@@ -337,6 +349,7 @@ ParseHexa(const std::string& str)
     assert(!parser.fail() && "invalid hex?");
     return n;
 }
+
 
 int
 ParseDecimal(const std::string& str)
@@ -348,6 +361,7 @@ ParseDecimal(const std::string& str)
     return n;
 }
 
+
 struct ProvideNullChar
 {
     static char
@@ -357,6 +371,7 @@ struct ProvideNullChar
     }
 };
 
+
 struct StringSizeProvider
 {
     static int
@@ -365,6 +380,7 @@ struct StringSizeProvider
         return ToInt(str.length());
     }
 };
+
 
 struct Lexer
     : public ErrorHandler
@@ -461,6 +477,7 @@ struct Lexer
         }
     }
 
+
     void
     ParseToTokens()
     {
@@ -500,6 +517,7 @@ struct Lexer
     std::vector<Token> tokens;
 };
 
+
 // ----------------------------------------------------------------------------------------------------
 // Parsing related
 // ----------------------------------------------------------------------------------------------------
@@ -507,7 +525,6 @@ struct Lexer
 struct Node
 {
     Node() = default;
-
     virtual ~Node() = default;
 
     Node(const Node&) = delete;
@@ -544,12 +561,14 @@ struct NumberNode : public Node
     explicit NumberNode(int n) : value(n)
     {
     }
+
     [[nodiscard]] int
     Calculate() const override
     {
         return value;
     }
 };
+
 
 struct AndNode : public Node
 {
@@ -561,12 +580,14 @@ struct AndNode : public Node
         , rhs(std::move(r))
     {
     }
+
     [[nodiscard]] int
     Calculate() const override
     {
         return lhs->Calculate() & rhs->Calculate();
     }
 };
+
 
 struct OrNode : public Node
 {
@@ -578,12 +599,14 @@ struct OrNode : public Node
         , rhs(std::move(r))
     {
     }
+
     [[nodiscard]] int
     Calculate() const override
     {
         return lhs->Calculate() | rhs->Calculate();
     }
 };
+
 
 struct ProvideEofToken
 {
@@ -594,6 +617,7 @@ struct ProvideEofToken
     }
 };
 
+
 template <typename T>
 struct VectorSizeProvider
 {
@@ -603,6 +627,7 @@ struct VectorSizeProvider
         return ToInt(vec.size());
     }
 };
+
 
 struct Parser
     : public ErrorHandler
@@ -681,9 +706,11 @@ struct Parser
     }
 };
 
+
 // ----------------------------------------------------------------------------------------------------
 // Commandline related
 // ----------------------------------------------------------------------------------------------------
+
 
 bool
 IsCommandLine(char c)
@@ -702,6 +729,7 @@ IsCommandLine(char c)
     }
     return false;
 }
+
 
 std::string
 ToBinaryString(int n)
@@ -737,6 +765,7 @@ ToBinaryString(int n)
     return ss.str();
 }
 
+
 void
 PrintNumber(Output* output, int n)
 {
@@ -744,6 +773,7 @@ PrintNumber(Output* output, int n)
     output->PrintInfo(Str{} << "hex: 0x" << std::hex << n);
     output->PrintInfo(Str{} << "bin: " << ToBinaryString(n));
 }
+
 
 enum
 {
@@ -754,6 +784,7 @@ enum
     MainOk = 0,
     MainUsage = 0
 };
+
 
 int
 RunCalcApp(
