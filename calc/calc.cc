@@ -108,15 +108,11 @@ IsBinary(char c)
 {
     if (c == '0' || c == '1')
     {
-        {
-            return true;
-        }
+        return true;
     }
     else
     {
-        {
-            return false;
-        }
+        return false;
     }
 }
 
@@ -126,15 +122,11 @@ IsNumber(char c)
 {
     if (c >= '0' && c <= '9')
     {
-        {
-            return true;
-        }
+        return true;
     }
     else
     {
-        {
-            return false;
-        }
+        return false;
     }
 }
 
@@ -159,15 +151,11 @@ IsAz(char c)
 {
     if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
     {
-        {
-            return true;
-        }
+        return true;
     }
     else
     {
-        {
-            return false;
-        }
+        return false;
     }
 }
 
@@ -177,15 +165,11 @@ IsAnd(char c)
 {
     if (c == '&')
     {
-        {
-            return true;
-        }
+        return true;
     }
     else
     {
-        {
-            return false;
-        }
+        return false;
     }
 }
 
@@ -195,15 +179,11 @@ IsOr(char c)
 {
     if (c == '|')
     {
-        {
-            return true;
-        }
+        return true;
     }
     else
     {
-        {
-            return false;
-        }
+        return false;
     }
 }
 
@@ -585,15 +565,11 @@ struct Parser
 
         if (HasErr())
         {
-            {
-                return ErrorNode::Make();
-            }
+            return ErrorNode::Make();
         }
         else
         {
-            {
-                return root;
-            }
+            return root;
         }
     }
 };
@@ -734,3 +710,4 @@ RunCalcApp(
 
     return MainOk;
 }
+
