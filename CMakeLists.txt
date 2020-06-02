@@ -29,6 +29,7 @@ add_library(calculator STATIC
     calc/calc.cc calc/calc.h
     calc/str.cc calc/str.h
     calc/output.cc calc/output.h
+    calc/errorhandler.cc calc/errorhandler.h
 )
 target_include_directories(calculator
     PUBLIC

@@ -10,6 +10,7 @@
 #include <string_view>
 
 #include "calc/str.h"
+#include "calc/errorhandler.h"
 
 // ----------------------------------------------------------------------------------------------------
 // Util related
@@ -26,32 +27,6 @@ ToSizet(int i)
 {
     return static_cast<std::size_t>(i);
 }
-
-struct ErrorHandler
-{
-    std::vector<std::string> errors;
-    void
-    Err(const std::string& str)
-    {
-        errors.emplace_back(str);
-    }
-
-    [[nodiscard]] bool
-    HasErr() const
-    {
-        return !errors.empty();
-    }
-
-    void
-    PrintErrors(Output* output)
-    {
-        output->PrintError("Error while parsing:");
-        for (const auto& err: errors)
-        {
-            output->PrintError(Str{} << " - " << err);
-        }
-    }
-};
 
 
 template <typename T, typename C, typename Default, typename SizeProvider>
