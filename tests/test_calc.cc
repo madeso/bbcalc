@@ -142,3 +142,30 @@ TEST_CASE("calc-convert", "[calc]")
     }
 }
 
+TEST_CASE("calc-eval", "[calc]")
+{
+    VectorOutput lines;
+
+    SECTION("or")
+    {
+        const auto output = RunCalcApp("calcapp", {"0b0101 & 0b1100"}, &lines);
+        CHECK(output == 0);
+        CHECK(VectorEquals(lines, {
+            Inf("dec: 4"),
+            Inf("hex: 0x4"),
+            Inf("bin: 100")
+        }));
+    }
+
+    SECTION("and")
+    {
+        const auto output = RunCalcApp("calcapp", {"0b0101 | 0b1100"}, &lines);
+        CHECK(output == 0);
+        CHECK(VectorEquals(lines, {
+            Inf("dec: 13"),
+            Inf("hex: 0xd"),
+            Inf("bin: 1101")
+        }));
+    }
+}
+
