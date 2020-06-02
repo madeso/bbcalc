@@ -16,6 +16,16 @@ const char* const PROGRAM_USAGE =
 // Util related
 // ----------------------------------------------------------------------------------------------------
 
+int to_int(std::size_t i)
+{
+    return static_cast<int>(i);
+}
+
+std::size_t to_sizet(int i)
+{
+    return static_cast<std::size_t>(i);
+}
+
 struct Str
 {
     std::stringstream ss;
@@ -44,7 +54,7 @@ template<typename T, typename C, typename Default, typename SizeProvider>
 struct Input
 {
     C input;
-    unsigned int next = 0;
+    int next = 0;
 
     // read a single char
     T Read()
@@ -57,7 +67,7 @@ struct Input
         {
             const auto old = next;
             next += 1;
-            return input[old];
+            return input[to_sizet(old)];
         }
     }
 
@@ -68,7 +78,7 @@ struct Input
     }
 
     // look ahead 1 character
-    T Peek(unsigned int advance = 0)
+    T Peek(int advance = 0)
     {
         if (next + advance >= SizeProvider::Size(input))
         {
@@ -76,7 +86,7 @@ struct Input
         }
         else
         {
-            return input[next + advance];
+            return input[to_sizet(next + advance)];
         }
     }
 };
@@ -229,9 +239,9 @@ struct ProvideNullChar
 
 struct StringSizeProvider
 {
-    static unsigned int Size(const std::string& str)
+    static int Size(const std::string& str)
     {
-        return str.length();
+        return to_int(str.length());
     }
 };
 
@@ -408,9 +418,9 @@ struct ProvideEofToken
 template<typename T>
 struct VectorSizeProvider
 {
-    static unsigned int Size(const std::vector<T>& vec)
+    static int Size(const std::vector<T>& vec)
     {
-        return vec.size();
+        return to_int(vec.size());
     }
 };
 
