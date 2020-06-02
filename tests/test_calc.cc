@@ -169,3 +169,35 @@ TEST_CASE("calc-eval", "[calc]")
     }
 }
 
+TEST_CASE("calc-error", "[calc]")
+{
+    VectorOutput lines;
+
+    SECTION("dog argument")
+    {
+        const auto output = RunCalcApp("calcapp", {"-dog"}, &lines);
+        CHECK(output == -1);
+        CHECK(VectorEquals(lines, {
+            Err("Invalid commandline argument -dog")
+        }));
+    }
+
+    SECTION("dog")
+    {
+        const auto output = RunCalcApp("calcapp", {"dog"}, &lines);
+        CHECK(output == -2);
+        CHECK(VectorEquals(lines, {
+            Err("Error while parsing:"),
+            Err(" - Invalid character: d")
+        }));
+    }
+
+    SECTION("empty expression")
+    {
+        const auto output = RunCalcApp("calcapp", {""}, &lines);
+        CHECK(output == -3);
+        CHECK(VectorEquals(lines, {
+            Err("Empty statement")
+        }));
+    }
+}

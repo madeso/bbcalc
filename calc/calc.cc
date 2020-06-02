@@ -538,11 +538,8 @@ int RunCalcApp
     {
         if (IsCommandLine(arg[0]))
         {
-            if (arg.length() <= 1)
-            {
-                output->PrintError(Str{} << "Invalid commandline argument " << arg);
-                return MAIN_CMD_ERR;
-            }
+            output->PrintError(Str{} << "Invalid commandline argument " << arg);
+            return MAIN_CMD_ERR;
         }
         else
         {
