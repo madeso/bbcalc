@@ -86,7 +86,7 @@ namespace
 }
 
 
-TEST_CASE("calc", "[calc]")
+TEST_CASE("calc-help", "[calc]")
 {
     VectorOutput lines;
 
@@ -101,8 +101,14 @@ TEST_CASE("calc", "[calc]")
             Inf(" - evaluate boolean expressions")
         }));
     }
+}
 
-    SECTION("convert dec")
+
+TEST_CASE("calc-convert", "[calc]")
+{
+    VectorOutput lines;
+
+    SECTION("dec")
     {
         const auto output = RunCalcApp("calcapp", {"42"}, &lines);
         CHECK(output == 0);
@@ -113,7 +119,7 @@ TEST_CASE("calc", "[calc]")
         }));
     }
 
-    SECTION("convert hex")
+    SECTION("hex")
     {
         const auto output = RunCalcApp("calcapp", {"0x42"}, &lines);
         CHECK(output == 0);
@@ -124,7 +130,7 @@ TEST_CASE("calc", "[calc]")
         }));
     }
 
-    SECTION("convert binary")
+    SECTION("binary")
     {
         const auto output = RunCalcApp("calcapp", {"0b1010"}, &lines);
         CHECK(output == 0);
