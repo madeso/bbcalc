@@ -12,68 +12,7 @@
 #include "calc/str.h"
 #include "calc/errorhandler.h"
 #include "calc/token.h"
-
-// ----------------------------------------------------------------------------------------------------
-// Util related
-// ----------------------------------------------------------------------------------------------------
-
-int
-ToInt(std::size_t i)
-{
-    return static_cast<int>(i);
-}
-
-std::size_t
-ToSizet(int i)
-{
-    return static_cast<std::size_t>(i);
-}
-
-
-template <typename T, typename C, typename Default, typename SizeProvider>
-struct Input
-{
-    C input;
-    int next = 0;
-
-    // read a single char
-    T
-    Read()
-    {
-        if (next >= SizeProvider::Size(input))
-        {
-            return Default::Provide();
-        }
-        else
-        {
-            const auto old = next;
-            next += 1;
-            return input[ToSizet(old)];
-        }
-    }
-
-    // returns true if we have reached eof and read/peek only return 0
-    [[nodiscard]] bool
-    IsEof() const
-    {
-        return next >= SizeProvider::Size(input);
-    }
-
-    // look ahead 1 character
-    T
-    Peek(int advance = 0)
-    {
-        if (next + advance >= SizeProvider::Size(input))
-        {
-            return Default::Provide();
-        }
-        else
-        {
-            return input[ToSizet(next + advance)];
-        }
-    }
-};
-
+#include "calc/input.h"
 
 // ----------------------------------------------------------------------------------------------------
 // Lexing related
