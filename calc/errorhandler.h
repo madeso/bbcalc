@@ -8,6 +8,7 @@
 struct Output;
 
 
+// todo: rename to log
 struct ErrorHandler
 {
     std::vector<std::string> errors;

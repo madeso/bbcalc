@@ -255,9 +255,11 @@ struct StringSizeProvider
 
 
 struct Lexer
-    : public ErrorHandler
-    , public Input<char, std::string, ProvideNullChar, StringSizeProvider>
+    : public Input<char, std::string, ProvideNullChar, StringSizeProvider>
 {
+    ErrorHandler* errors;
+    explicit Lexer(ErrorHandler* e) : errors(e) {}
+
     void
     SkipSpaces()
     {
@@ -273,7 +275,7 @@ struct Lexer
         const auto first = Peek();
         if (!IsNumber(first))
         {
-            Err(Str() << "Numbers must start with a number, but started with '"
+            errors->Err(Str() << "Numbers must start with a number, but started with '"
                       << first << "' (" << static_cast<int>(first) << ")");
             return 0;
         }
@@ -292,7 +294,7 @@ struct Lexer
             const auto read = ss.str();
             if (read.empty())
             {
-                Err(Str()
+                errors->Err(Str()
                     << "Numbers started with 0x must contain atleast one hexa character but was continued with "
                     << Peek());
                 return 0;
@@ -311,7 +313,7 @@ struct Lexer
                 }
                 else
                 {
-                    Err(Str()
+                    errors->Err(Str()
                         << "binary numbers can't contain other than 0 or 1, read: "
                         << Peek());
                     return 0;
@@ -320,7 +322,7 @@ struct Lexer
             const auto read = ss.str();
             if (read.empty())
             {
-                Err(Str()
+                errors->Err(Str()
                     << "Numbers started with 0b must contain atleast one binary character but was continued with "
                     << Peek());
                 return 0;
@@ -353,7 +355,7 @@ struct Lexer
     void
     ParseToTokens()
     {
-        while (!IsEof() && !HasErr())
+        while (!IsEof() && !errors->HasErr())
         {
             SkipSpaces();
             if (!IsEof())
@@ -361,7 +363,7 @@ struct Lexer
                 if (IsNumber(Peek()))
                 {
                     const auto num = ReadNumber();
-                    if (!HasErr())
+                    if (!errors->HasErr())
                     {
                         tokens.emplace_back(Token::Number(num));
                     }
@@ -379,7 +381,7 @@ struct Lexer
                 }
                 else
                 {
-                    Err(Str() << "Invalid character: " << Peek());
+                    errors->Err(Str() << "Invalid character: " << Peek());
                     return;
                 }
             }
@@ -388,6 +390,16 @@ struct Lexer
 
     std::vector<Token> tokens;
 };
+
+
+std::vector<Token>
+RunLexer(const std::string& source, ErrorHandler* errors)
+{
+    auto lexer = Lexer{errors};
+    lexer.input = source;
+    lexer.ParseToTokens();
+    return lexer.tokens;
+}
 
 
 // ----------------------------------------------------------------------------------------------------
@@ -502,12 +514,14 @@ struct VectorSizeProvider
 
 
 struct Parser
-    : public ErrorHandler
-    , Input<const Token&,
+    : public Input<const Token&,
             std::vector<Token>,
             ProvideEofToken,
             VectorSizeProvider<Token>>
 {
+    ErrorHandler* errors;
+    explicit Parser(ErrorHandler* e) : errors(e) {}
+
     std::shared_ptr<Node>
     ParseNumber()
     {
@@ -517,7 +531,7 @@ struct Parser
         }
         else
         {
-            Err(Str() << "Expected number but got " << Read().ToString());
+            errors->Err(Str() << "Expected number but got " << Read().ToString());
             return ErrorNode::Make();
         }
     }
@@ -526,7 +540,7 @@ struct Parser
     Parse()
     {
         auto root = ParseNumber();
-        if (HasErr())
+        if (errors->HasErr())
         {
             return ErrorNode::Make();
         }
@@ -539,7 +553,7 @@ struct Parser
                 Read();
                 auto lhs = root;
                 auto rhs = ParseNumber();
-                if (HasErr())
+                if (errors->HasErr())
                 {
                     return ErrorNode::Make();
                 }
@@ -550,7 +564,7 @@ struct Parser
                 Read();
                 auto lhs = root;
                 auto rhs = ParseNumber();
-                if (HasErr())
+                if (errors->HasErr())
                 {
                     return ErrorNode::Make();
                 }
@@ -558,12 +572,12 @@ struct Parser
                 break;
             }
             default:
-                Err(Str() << "Expected OP but got " << Read().ToString());
+                errors->Err(Str() << "Expected OP but got " << Read().ToString());
                 return ErrorNode::Make();
             }
         }
 
-        if (HasErr())
+        if (errors->HasErr())
         {
             return ErrorNode::Make();
         }
@@ -573,6 +587,15 @@ struct Parser
         }
     }
 };
+
+
+std::shared_ptr<Node>
+RunParser(const std::vector<Token>& tokens, ErrorHandler* errors)
+{
+    auto parser = Parser{errors};
+    parser.input = tokens;
+    return parser.Parse();
+}
 
 
 // ----------------------------------------------------------------------------------------------------
@@ -669,29 +692,27 @@ RunCalcApp(
         }
         else
         {
-            Lexer lexer;
-            lexer.input = arg;
-            lexer.ParseToTokens();
-            if (lexer.HasErr())
+            ErrorHandler errors;
+
+            const auto tokens = RunLexer(arg, &errors);
+
+            if (errors.HasErr())
             {
-                lexer.PrintErrors(output);
+                errors.PrintErrors(output);
                 return MainLexErr;
             }
 
-            if (lexer.tokens.empty())
+            if (tokens.empty())
             {
                 output->PrintError("Empty statement");
                 return MainEmptyLex;
             }
 
-            Parser parser;
-            parser.input = lexer.tokens;
+            auto root = RunParser(tokens, &errors);
 
-            auto root = parser.Parse();
-
-            if (parser.HasErr())
+            if (errors.HasErr())
             {
-                parser.PrintErrors(output);
+                errors.PrintErrors(output);
                 return MainParserErr;
             }
 
