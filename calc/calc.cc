@@ -14,96 +14,12 @@
 #include "calc/token.h"
 #include "calc/input.h"
 #include "calc/lexer.h"
+#include "calc/ast.h"
 
 
 // ----------------------------------------------------------------------------------------------------
 // Parsing related
 // ----------------------------------------------------------------------------------------------------
-
-struct Node
-{
-    Node() = default;
-    virtual ~Node() = default;
-
-    Node(const Node&) = delete;
-    Node(Node&&) = delete;
-    void
-    operator=(const Node&) = delete;
-    void
-    operator=(Node&&) = delete;
-
-    [[nodiscard]] virtual int
-    Calculate() const = 0;
-};
-
-struct ErrorNode : public Node
-{
-    [[nodiscard]] int
-    Calculate() const override
-    {
-        return 0;
-    }
-
-    static std::shared_ptr<Node>
-    Make()
-    {
-        return std::make_shared<ErrorNode>();
-    }
-};
-
-
-struct NumberNode : public Node
-{
-    int value;
-
-    explicit NumberNode(int n) : value(n)
-    {
-    }
-
-    [[nodiscard]] int
-    Calculate() const override
-    {
-        return value;
-    }
-};
-
-
-struct AndNode : public Node
-{
-    std::shared_ptr<Node> lhs;
-    std::shared_ptr<Node> rhs;
-
-    AndNode(std::shared_ptr<Node> l, std::shared_ptr<Node> r)
-        : lhs(std::move(l))
-        , rhs(std::move(r))
-    {
-    }
-
-    [[nodiscard]] int
-    Calculate() const override
-    {
-        return lhs->Calculate() & rhs->Calculate();
-    }
-};
-
-
-struct OrNode : public Node
-{
-    std::shared_ptr<Node> lhs;
-    std::shared_ptr<Node> rhs;
-
-    OrNode(std::shared_ptr<Node> l, std::shared_ptr<Node> r)
-        : lhs(std::move(l))
-        , rhs(std::move(r))
-    {
-    }
-
-    [[nodiscard]] int
-    Calculate() const override
-    {
-        return lhs->Calculate() | rhs->Calculate();
-    }
-};
 
 
 struct ProvideEofToken

@@ -34,6 +34,7 @@ add_library(calculator STATIC
     calc/input.h
     calc/ints.cc calc/ints.h
     calc/lexer.cc calc/lexer.h
+    calc/ast.cc calc/ast.h
 )
 target_include_directories(calculator
     PUBLIC
