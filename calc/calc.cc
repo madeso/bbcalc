@@ -253,69 +253,71 @@ struct StringSizeProvider
     }
 };
 
+using LexerInput = Input<char, std::string, ProvideNullChar, StringSizeProvider>;
 
 struct Lexer
-    : public Input<char, std::string, ProvideNullChar, StringSizeProvider>
 {
+    LexerInput input;
+
     ErrorHandler* errors;
     explicit Lexer(ErrorHandler* e) : errors(e) {}
 
     void
     SkipSpaces()
     {
-        while (!IsEof() && IsSpace(Peek()))
+        while (!input.IsEof() && IsSpace(input.Peek()))
         {
-            Read();
+            input.Read();
         }
     }
 
     int
     ReadNumber()
     {
-        const auto first = Peek();
+        const auto first = input.Peek();
         if (!IsNumber(first))
         {
             errors->Err(Str() << "Numbers must start with a number, but started with '"
                       << first << "' (" << static_cast<int>(first) << ")");
             return 0;
         }
-        Read();
+        input.Read();
 
-        const auto second = Peek();
+        const auto second = input.Peek();
 
         if (second == 'x' || second == 'X')
         {
-            Read();  // read the x
+            input.Read();  // read the x
             std::stringstream ss;
-            while (!IsEof() && IsHexa(Peek()))
+            while (!input.IsEof() && IsHexa(input.Peek()))
             {
-                ss << Read();
+                ss << input.Read();
             }
             const auto read = ss.str();
             if (read.empty())
             {
                 errors->Err(Str()
                     << "Numbers started with 0x must contain atleast one hexa character but was continued with "
-                    << Peek());
+                    << input.Peek());
                 return 0;
             }
             return ParseHexa(read);
         }
         else if (second == 'b' || second == 'B')
         {
-            Read();  // read the b
+            input.Read();  // read the b
             std::stringstream ss;
-            while (!IsEof() && IsNumber(Peek()))
+            while (!input.IsEof() && IsNumber(input.Peek()))
             {
-                if (IsBinary(Peek()))
+                if (IsBinary(input.Peek()))
                 {
-                    ss << Read();
+                    ss << input.Read();
                 }
                 else
                 {
                     errors->Err(Str()
                         << "binary numbers can't contain other than 0 or 1, read: "
-                        << Peek());
+                        << input.Peek());
                     return 0;
                 }
             }
@@ -324,7 +326,7 @@ struct Lexer
             {
                 errors->Err(Str()
                     << "Numbers started with 0b must contain atleast one binary character but was continued with "
-                    << Peek());
+                    << input.Peek());
                 return 0;
             }
             return ParseBinary(read);
@@ -332,14 +334,14 @@ struct Lexer
         else if (IsNumber(second))
         {
             // read the second number
-            Read();
+            input.Read();
 
             std::stringstream ss;
             ss << first << second;
 
-            while (!IsEof() && IsNumber(Peek()))
+            while (!input.IsEof() && IsNumber(input.Peek()))
             {
-                ss << Read();
+                ss << input.Read();
             }
             const auto read = ss.str();
             return ParseDecimal(read);
@@ -355,12 +357,12 @@ struct Lexer
     void
     ParseToTokens()
     {
-        while (!IsEof() && !errors->HasErr())
+        while (!input.IsEof() && !errors->HasErr())
         {
             SkipSpaces();
-            if (!IsEof())
+            if (!input.IsEof())
             {
-                if (IsNumber(Peek()))
+                if (IsNumber(input.Peek()))
                 {
                     const auto num = ReadNumber();
                     if (!errors->HasErr())
@@ -369,19 +371,19 @@ struct Lexer
                     }
                     SkipSpaces();
                 }
-                else if (IsAnd(Peek()))
+                else if (IsAnd(input.Peek()))
                 {
-                    Read();
+                    input.Read();
                     tokens.emplace_back(Token::And());
                 }
-                else if (IsOr(Peek()))
+                else if (IsOr(input.Peek()))
                 {
-                    Read();
+                    input.Read();
                     tokens.emplace_back(Token::Or());
                 }
                 else
                 {
-                    errors->Err(Str() << "Invalid character: " << Peek());
+                    errors->Err(Str() << "Invalid character: " << input.Peek());
                     return;
                 }
             }
@@ -396,7 +398,7 @@ std::vector<Token>
 RunLexer(const std::string& source, ErrorHandler* errors)
 {
     auto lexer = Lexer{errors};
-    lexer.input = source;
+    lexer.input.input = source;
     lexer.ParseToTokens();
     return lexer.tokens;
 }
