@@ -454,25 +454,28 @@ struct VectorSizeProvider
 };
 
 
-struct Parser
-    : public Input<const Token&,
+using ParserInput = Input<const Token&,
             std::vector<Token>,
             ProvideEofToken,
-            VectorSizeProvider<Token>>
+            VectorSizeProvider<Token>>;
+
+struct Parser
 {
+    ParserInput input;
+
     ErrorHandler* errors;
     explicit Parser(ErrorHandler* e) : errors(e) {}
 
     std::shared_ptr<Node>
     ParseNumber()
     {
-        if (Peek().type == Token::NUMBER)
+        if (input.Peek().type == Token::NUMBER)
         {
-            return std::make_shared<NumberNode>(Read().value);
+            return std::make_shared<NumberNode>(input.Read().value);
         }
         else
         {
-            errors->Err(Str() << "Expected number but got " << Read().ToString());
+            errors->Err(Str() << "Expected number but got " << input.Read().ToString());
             return ErrorNode::Make();
         }
     }
@@ -486,12 +489,12 @@ struct Parser
             return ErrorNode::Make();
         }
 
-        while (!IsEof())
+        while (!input.IsEof())
         {
-            switch (Peek().type)
+            switch (input.Peek().type)
             {
             case Token::OPAND: {
-                Read();
+                input.Read();
                 auto lhs = root;
                 auto rhs = ParseNumber();
                 if (errors->HasErr())
@@ -502,7 +505,7 @@ struct Parser
                 break;
             }
             case Token::OPOR: {
-                Read();
+                input.Read();
                 auto lhs = root;
                 auto rhs = ParseNumber();
                 if (errors->HasErr())
@@ -513,7 +516,7 @@ struct Parser
                 break;
             }
             default:
-                errors->Err(Str() << "Expected OP but got " << Read().ToString());
+                errors->Err(Str() << "Expected OP but got " << input.Read().ToString());
                 return ErrorNode::Make();
             }
         }
@@ -534,7 +537,7 @@ std::shared_ptr<Node>
 RunParser(const std::vector<Token>& tokens, ErrorHandler* errors)
 {
     auto parser = Parser{errors};
-    parser.input = tokens;
+    parser.input.input = tokens;
     return parser.Parse();
 }
 
