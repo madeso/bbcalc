@@ -4,6 +4,10 @@
 #include <string>
 
 
+int
+ParseBinary(const std::string& str);
+
+
 std::string
 ToBinaryString(int n);
 

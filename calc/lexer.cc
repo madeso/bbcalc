@@ -7,6 +7,7 @@
 #include "calc/ints.h"
 #include "calc/input.h"
 #include "calc/str.h"
+#include "calc/binary.h"
 
 
 bool
@@ -114,30 +115,6 @@ IsOr(char c)
     {
         return false;
     }
-}
-
-
-int
-ParseBinary(const std::string& str)
-{
-    int n = 0;
-    for (const char c: str)
-    {
-        n = n << 1;
-        if (c == '1')
-        {
-            n = n | 0x1;
-        }
-        else if (c == '0')
-        {
-            // nothing
-        }
-        else
-        {
-            assert(0 && "invalid binary");
-        }
-    }
-    return n;
 }
 
 
