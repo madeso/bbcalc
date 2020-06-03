@@ -33,6 +33,7 @@ add_library(calculator STATIC
     calc/token.cc calc/token.h
     calc/input.h
     calc/ints.cc calc/ints.h
+    calc/lexer.cc calc/lexer.h
 )
 target_include_directories(calculator
     PUBLIC
