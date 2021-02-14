@@ -16,6 +16,7 @@ target_include_directories(calculator
 )
 target_link_libraries(calculator
     PRIVATE
+    fmt::fmt
     project_options
     project_warnings
 )
