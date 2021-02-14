@@ -81,3 +81,5 @@ target_link_libraries(
     project_warnings
 )
 
+include(CTest)
+catch_discover_tests(tests)
