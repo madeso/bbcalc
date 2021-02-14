@@ -1,7 +1,8 @@
 #include "calc/errorhandler.h"
 
+#include <fmt/core.h>
+
 #include "calc/output.h"
-#include "calc/str.h"
 
 
 void
@@ -24,7 +25,7 @@ ErrorHandler::PrintErrors(Output* output)
     output->PrintError("Error while parsing:");
     for (const auto& err: errors)
     {
-        output->PrintError(Str{} << " - " << err);
+        output->PrintError(fmt::format(" - {}", err));
     }
 }
 

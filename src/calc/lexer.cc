@@ -3,10 +3,11 @@
 #include <cassert>
 #include <sstream>
 
+#include <fmt/core.h>
+
 #include "calc/errorhandler.h"
 #include "calc/ints.h"
 #include "calc/input.h"
-#include "calc/str.h"
 #include "calc/binary.h"
 
 
@@ -183,8 +184,7 @@ struct Lexer
         const auto first = input.Peek();
         if (!IsNumber(first))
         {
-            errors->Err(Str() << "Numbers must start with a number, but started with '"
-                      << first << "' (" << static_cast<int>(first) << ")");
+            errors->Err(fmt::format("Numbers must start with a number, but started with '{}' ({})", first, static_cast<int>(first)));
             return 0;
         }
         input.Read();
@@ -202,9 +202,7 @@ struct Lexer
             const auto read = ss.str();
             if (read.empty())
             {
-                errors->Err(Str()
-                    << "Numbers started with 0x must contain atleast one hexa character but was continued with "
-                    << input.Peek());
+                errors->Err(fmt::format("Numbers started with 0x must contain atleast one hexa character but was continued with {}", input.Peek()));
                 return 0;
             }
             return ParseHexa(read);
@@ -221,18 +219,14 @@ struct Lexer
                 }
                 else
                 {
-                    errors->Err(Str()
-                        << "binary numbers can't contain other than 0 or 1, read: "
-                        << input.Peek());
+                    errors->Err(fmt::format("binary numbers can't contain other than 0 or 1, read: {}", input.Peek()));
                     return 0;
                 }
             }
             const auto read = ss.str();
             if (read.empty())
             {
-                errors->Err(Str()
-                    << "Numbers started with 0b must contain atleast one binary character but was continued with "
-                    << input.Peek());
+                errors->Err(fmt::format("Numbers started with 0b must contain atleast one binary character but was continued with {}", input.Peek()));
                 return 0;
             }
             return ParseBinary(read);
@@ -289,7 +283,7 @@ struct Lexer
                 }
                 else
                 {
-                    errors->Err(Str() << "Invalid character: " << input.Peek());
+                    errors->Err(fmt::format("Invalid character: {}", input.Peek()));
                     return;
                 }
             }

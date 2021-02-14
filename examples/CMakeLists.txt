@@ -4,6 +4,7 @@ add_executable(bbcalc
 target_link_libraries(bbcalc
     PUBLIC
     calculator
+    fmt::fmt
     PRIVATE
     project_options
     project_warnings

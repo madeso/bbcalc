@@ -1,14 +1,13 @@
 #include "catch.hpp"
 
+#include <fmt/format.h>
+
 #include "calc/calc.h"
-#include "calc/str.h"
 
 #include "catchy/vectorequals.h"
 
 using namespace catchy;
 
-namespace
-{
 struct Line
 {
     bool error;
@@ -39,13 +38,14 @@ Err(const std::string& s)
     return l;
 }
 
-std::ostream&
-operator<<(std::ostream& stream, const Line& line)
-{
-    stream << (line.error ? "ERR" : "INF");
-    stream << " " << line.text;
-    return stream;
-}
+template <> struct fmt::formatter<Line>: fmt::formatter<std::string> {
+  template <typename FormatContext>
+  auto format(const Line& line, FormatContext& ctx) {
+    const auto name = fmt::format("{} {}", line.error ? "ERR" : "INF", line.text);
+    return formatter<string_view>::format(name, ctx);
+  }
+};
+
 
 struct VectorOutput : public Output
 {
@@ -70,7 +70,7 @@ VectorEquals(const VectorOutput& lhs, const std::vector<Line> rhs)
     return catchy::VectorEquals(
             lhs.lines,
             rhs,
-            [](const Line& f) -> std::string { return Str() << f; },
+            [](const Line& f) -> std::string { return fmt::format("{}", f); },
             [](const Line& a, const Line& b) -> FalseString {
                 if (a == b)
                 {
@@ -78,11 +78,11 @@ VectorEquals(const VectorOutput& lhs, const std::vector<Line> rhs)
                 }
                 else
                 {
-                    return FalseString::False(Str() << a << " != " << b);
+                    return FalseString::False(fmt::format("{} != {}", a, b));
                 }
             });
 }
-}
+
 
 
 TEST_CASE("calc-help", "[calc]")

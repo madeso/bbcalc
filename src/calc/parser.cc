@@ -1,7 +1,8 @@
 #include "calc/parser.h"
 
+#include <fmt/core.h>
+
 #include "calc/input.h"
-#include "calc/str.h"
 #include "calc/errorhandler.h"
 
 struct ProvideEofToken
@@ -46,7 +47,7 @@ struct Parser
         }
         else
         {
-            errors->Err(Str() << "Expected number but got " << input.Read().ToString());
+            errors->Err(fmt::format("Expected number but got {}", input.Read().ToString()));
             return ErrorNode::Make();
         }
     }
@@ -87,7 +88,7 @@ struct Parser
                 break;
             }
             default:
-                errors->Err(Str() << "Expected OP but got " << input.Read().ToString());
+                errors->Err(fmt::format("Expected OP but got {}", input.Read().ToString()));
                 return ErrorNode::Make();
             }
         }

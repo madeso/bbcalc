@@ -9,7 +9,8 @@
 #include <array>
 #include <string_view>
 
-#include "calc/str.h"
+#include <fmt/core.h>
+
 #include "calc/errorhandler.h"
 #include "calc/token.h"
 #include "calc/input.h"
@@ -41,9 +42,9 @@ IsCommandLine(char c)
 void
 PrintNumber(Output* output, int n)
 {
-    output->PrintInfo(Str{} << "dec: " << std::dec << n);
-    output->PrintInfo(Str{} << "hex: 0x" << std::hex << n);
-    output->PrintInfo(Str{} << "bin: " << ToBinaryString(n));
+    output->PrintInfo(fmt::format("dec: {}", n));
+    output->PrintInfo(fmt::format("hex: 0x{:x}", n));
+    output->PrintInfo(fmt::format("bin: {}", ToBinaryString(n)));
 }
 
 
@@ -68,7 +69,7 @@ RunCalcApp(
     {
         if (IsCommandLine(arg[0]))
         {
-            output->PrintError(Str{} << "Invalid commandline argument " << arg);
+            output->PrintError(fmt::format("Invalid commandline argument {}", arg));
             return MainCmdErr;
         }
         else
