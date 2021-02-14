@@ -33,5 +33,21 @@ add_subdirectory(examples)
 
 ##############################################################################
 ## calc (unit) tests
+add_executable(tests
+    tests/main.cc
+    tests/test_calc.cc
+)
+target_link_libraries(
+    tests
+    PUBLIC
+    calculator
+    catchy
+    ${CMAKE_THREAD_LIBS_INIT}
+    PRIVATE
+    project_options
+    project_warnings
+)
 
-add_subdirectory(tests)
+include(CTest)
+enable_testing()
+catch_discover_tests(tests)
