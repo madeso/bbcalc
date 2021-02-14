@@ -1,7 +1,6 @@
 # bbcalc
 boolean & binary calculator
 
-[![Build Status](https://travis-ci.org/madeso/bbcalc.svg?branch=master)](https://travis-ci.org/madeso/bbcalc)
 [![Coverage Status](https://coveralls.io/repos/github/madeso/bbcalc/badge.svg?branch=master)](https://coveralls.io/github/madeso/bbcalc?branch=master)
 
 ## Current features
