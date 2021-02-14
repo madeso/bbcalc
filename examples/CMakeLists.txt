@@ -1,0 +1,10 @@
+add_executable(bbcalc
+    cli.cc
+)
+target_link_libraries(bbcalc
+    PUBLIC
+    calculator
+    PRIVATE
+    project_options
+    project_warnings
+)
