@@ -1,6 +1,9 @@
 # bbcalc
 boolean & binary calculator
 
+[![windows](https://github.com/madeso/bbcalc/workflows/windows/badge.svg)](https://github.com/madeso/bbcalc/actions?query=workflow%3Awindows)
+[![linux](https://github.com/madeso/bbcalc/workflows/linux/badge.svg)](https://github.com/madeso/bbcalc/actions?query=workflow%3Alinux)
+[![macos](https://github.com/madeso/bbcalc/workflows/macos/badge.svg)](https://github.com/madeso/bbcalc/actions?query=workflow%3Amacos)
 [![Coverage Status](https://coveralls.io/repos/github/madeso/bbcalc/badge.svg?branch=master)](https://coveralls.io/github/madeso/bbcalc?branch=master)
 
 ## Current features
